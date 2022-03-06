@@ -1,6 +1,11 @@
-const int analogInput = A13;  //P4.2
-const int lead0 = 39;  //P2.6
-const int lead1 = 38;  //P2.4
+const int analogInput = 24;  //P4.2 analogRead()
+const int analogOutput = 34; //P2.3 analogWrite()
+const int lead0 = 39;  //P2.6   GPIO I/O
+const int lead1 = 38;  //P2.4   GPIO I/O
+
+//declare values
+int sensorValue = 0;
+int outputValue = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -18,37 +23,27 @@ void loop() {
   
   else{
 
-  Serial.println("ADC 10-bit (default)");
-  for(int i=0; i<50; i++){
-  // read input on A0 at default resolution (10 bits) 
-  // send it out serial connection back to Energia IDE
-  analogReadResolution(10);
-  //Serial.println("ADC 10-bit (default) : ");
-  Serial.println(analogRead(analogInput));
-  }
+  //delay(1000);
 
-  delay(1000);
-
-  Serial.println("ADC 12-bit : ");
-  for(int i=0; i<50; i++){
-  //change resolution to 12 bits
-  analogReadResolution(12);
-  //Serial.println("ADC 12-bit : ");
-  Serial.println(analogRead(analogInput));
-
-  }
-
-  delay(1000);
-
-  Serial.println("ADC 14-bit");  
-  for(int i=0; i<50; i++){
+  //Serial.println("ADC 14-bit");  
   //change resolution to 14 bits
-  analogReadResolution(14);
-  //Serial.println("ADC 14-bit : ");
-  Serial.println(analogRead(analogInput));
-  }
+  analogReadResolution(12);
 
-  delay(1000);
+  sensorValue = analogRead(analogInput);
+  Serial.println(sensorValue);
+
+  outputValue = map(sensorValue, 0, 1023, 0, 255);
+  analogWrite(analogOutput, outputValue);
+
+//  print results to serial monitor
+//  Serial.print("Sensor = ");
+//  Serial.print(sensorValue);
+//  Serial.print("\t Output = ");
+//  Serial.println(outputValue);
+
+  //add short delay for the analog-to-digital converter to settle
+  delay(1);
+
   }
 
   
