@@ -122,7 +122,7 @@ void setup() {
   pinMode(lead1, INPUT);
 
   connectToWiFi();
-  
+  connect();
 }
 
 /* =========================================
