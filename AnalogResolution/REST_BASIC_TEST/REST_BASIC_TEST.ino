@@ -10,6 +10,16 @@ char ssid[] = "AndroidAP2744";
 char password[] = "Hello1234";
 char ubidots_server[] = "industrial.api.ubidots.com";
 
+const int analogInput = 5;  //P4.1 (A12) analogRead()
+const int analogOutput = 19; //P2.5  analogWrite()
+const int lead0 = 39;  //P3.5   GPIO I/O
+const int lead1 = 38;  //P3.7   GPIO I/O
+
+/* ==== VARIABLES ====== */ 
+float sensorValue = 0;
+float mappedOutput = 0;
+String mappedOutput_as_String;
+
 /* =========================================
  *  Supporting Setup Functions
  * ========================================= */
@@ -31,7 +41,6 @@ void connectToWiFi(){
   Serial.println(WiFi.localIP()); 
 /* --- CONNECT TO WIFI END ()------*/
 } 
-
 
 
 void connect(){
@@ -77,9 +86,15 @@ void readResponse(){
 }
 
 String generateData(){
-  randomSeed(millis());
-  String data = "{\"direction\": ";
-  data += random(300);
+  sensorValue = analogRead(analogInput);  //Read in data from ECG 
+  Serial.println(sensorValue);
+
+  mappedOutput = map(sensorValue, 0, 1023, 0, 255); //scale/map raw data to 14 bit resolution analog out put (ie. 0 off, 255 fully on scale)
+  //analogWrite(analogOutput, mappedOutput);   
+  mappedOutput_as_String = String(mappedOutput, 2);  //convert float outputValue to string with 2 decimal places
+  
+  String data = "{\"ECG\": ";
+  data += mappedOutput_as_String;  //take the mapped ecg data and turn it into string data here to append
   data += "}";
   return data;
 }
@@ -91,6 +106,9 @@ String generateData(){
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);         //opens serial connection to the board
+  analogReadResolution(14);   //set analog resolution to 14 bits (default)  
+  pinMode(lead0, INPUT);      //set GPIO pins as Input
+  pinMode(lead1, INPUT);
   connectToWiFi();
   delay(100);
   connect();
@@ -106,8 +124,8 @@ delay(100);
 if(client.connected()){
  
   postData(generateData());
+  delay(100);
   readResponse();
-  //add short delay for the analog-to-digital converter to settle
   delay(100);
   }
 
