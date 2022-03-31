@@ -46,17 +46,14 @@ void setup() {
 
 void loop() {
 
-  for(int i=0; i< numSamples; i++){
-    dataArray[i] = ecgRead();
-    generateData();
-  }
-  Serial.println("POST DATA CALL COMPLETE");
+  generateData();
+  postData(generatePayload());
+  delay(1000);
   readResponse();
   delay(1000);
 
 }
 
-// 1.---------------------------------------
 
 /* =========================================
  *  Supporting Setup Functions
@@ -107,7 +104,7 @@ void generateData(){  //PROBLEM IS OCCURING HERE, READING IN ECG values and conv
   for(int i=0; i<numSamples; i++){                           //define the number of samples per data block 
     //sensor_data[i] = analogRead(analogInput);              //Read in data from ECG 
     sensor_data[i] = random(300);                            //DEBUGGING ONLY
-    mapped_data[i] = map(sensorValue, 0, 1023, 0, 255);    //map data to range
+    mapped_data[i] = map(sensor_data[i], 0, 1023, 0, 255);    //map data to range
     Serial.println("Sensor: "); Serial.print(sensor_data[i]); Serial.print("  Mapped: "); Serial.print(mapped_data[i]);
     delay(100);
   }
@@ -121,7 +118,7 @@ String generatePayload() {
 
   for(int i=0; i<numSamples; i++){
     str_data = String(mapped_data[i], 2);
-    data = "{\"DATA_TEST\": "
+    data = "{\"DATA_TEST\": ";
     data += str_data;
     data += "},";
   }
