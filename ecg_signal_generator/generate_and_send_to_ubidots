@@ -1,0 +1,144 @@
+#include <WiFi.h>
+char ssid[] = "";
+char password[] = "";
+String token = "";
+char ubidots_server[] = "industrial.api.ubidots.com";
+
+int readings[1000];
+int counter = 0;
+WiFiClient client;
+double ekg[] = {0.19136,0.19136,0.27337,0.41006,0.54675,0.74282,2.0672,4.8761,9.1102,13.701,18.291,22.881,27.472,30.226,29.92,26.554,21.963,17.373,12.782,8.1921,4.2015,1.7103,0.7185,0.62638,0.53427,0.44215,0.35004,0.25792,0.16581,-0.9667,-6.2608,-14.335,-14.306,-1.4965,22.712,48.475,71.736,76.651,60.719,26.441,-10.339,-44.249,-57.116,-46.071,-20.956,-4.5927,0.149,0.24213,0.33526,0.42839,0.52151,0.61464,0.70777,0.80089,0.89402,0.98715,1.0803,1.1734,1.2665,1.3597,1.4528,1.5459,1.9248,3.0181,4.8258,7.0621,9.2985,11.535,13.771,15.65,16.097,15.053,12.877,10.64,8.404,6.1676,4.0046,2.3792,1.3647,0.88781,0.48964,0.1937,0.032284,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+void setup() {
+  connectToWiFi();
+  printWifiStatus();
+
+  Serial.begin(115200);
+  pinMode(31, INPUT); // Setup for leads off detection LO +
+  pinMode(32, INPUT); // Setup for leads off detection LO -
+
+}
+String ecg="";
+void loop() {
+  for(int j =0;j<120;j++){
+    ecg = "";
+    ecg += "[";
+
+    for(int k = 0;k<100;k++)
+    {
+      Serial.println(ekg[k],4);
+      //int val = map(ekg[k], -100, 100, -1000, 1000);
+      ecg += "{\"value\":" + String(ekg[k] *100, 2) + ", \"timestamp\":" + String(millis())+ "},";
+      delay(10);
+    }
+    ecg.remove(ecg.length()-1);
+    ecg += "]";
+    //Serial.println(ecg);
+    postData(ecg);
+    readResponse();
+  }
+  //end
+  while(true){
+    delay(1000);
+  }
+  
+  if((digitalRead(31) == 1)||(digitalRead(32) == 1)){
+    Serial.println('!');
+  }
+  else{
+      int reading = analogRead(5);
+      //readings[counter] = reading;
+      //counter++;
+//      int val = map(reading, 0, 1023, -255, 255);
+      Serial.println(reading);
+  }
+  if (counter==999){
+//    Serial.println(reading);
+  }
+  delay(20);
+}
+
+void connectToWiFi(){
+//    Serial.print("Attempting to connect to Network named: ");
+//  Serial.println(ssid); 
+  WiFi.begin(ssid, password);
+  while ( WiFi.status() != WL_CONNECTED) {
+//    Serial.print(".");
+    delay(150);
+  }
+  
+//  Serial.println("\nYou're connected to the network");
+//  Serial.println("Waiting for an ip address");
+  
+  while (WiFi.localIP() == INADDR_NONE) {
+//    Serial.print(".");
+    delay(300);
+  }
+  
+//  Serial.println("\nIP Address obtained");
+}
+
+void readResponse(){
+    // if there are incoming bytes available
+  // from the server, read them and print them:
+  while (client.available()) {
+    char c = client.read();
+    Serial.write(c);
+  }
+
+  // if the server's disconnected, stop the client:
+  if (!client.connected()) {
+//    Serial.println();
+//    Serial.println("\ndisconnecting from server.");
+    client.stop();
+  }
+}
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+//  Serial.print("SSID: ");
+//  Serial.println(WiFi.SSID());
+
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+//  Serial.print("IP Address: ");
+//  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+//  Serial.print("signal strength (RSSI):");
+//  Serial.print(rssi);
+//  Serial.println(" dBm");
+}
+
+void postData(String data){
+  connect();
+  // Make a HTTP request:
+  client.println("POST /api/v1.6/devices/ti/ecg/values HTTP/1.1");
+  client.println("Host: industrial.api.ubidots.com");
+  client.println("Content-Type: text/json");
+  client.println("X-Auth-Token: " + token);
+  client.print("Content-Length: ");
+  client.println(data.length());
+  client.println();
+  client.print(data);
+  Serial.println("\nposted to server");
+  Serial.println(data);
+}
+
+void connect(){
+  if (!client.connected()){
+//    Serial.println("\nStarting connection to server...");
+    // if you get a connection, report back via serial:
+    if (client.connect(ubidots_server, 80)) {
+//      Serial.println("\nConnected to server");   
+    }   
+  }  
+}
+
+String generateData(){
+  randomSeed(millis());
+  String data = "{\"direction\": ";
+  data += random(300);
+  data += "}";
+  return data;
+}
