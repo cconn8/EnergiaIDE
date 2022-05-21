@@ -29,9 +29,9 @@
 #include <WiFiClient.h>
 #include "Ubidots.h"
 
-char ubidotsToken[] = "BBFF-u0EJzOxnOiQxUJyAIkNKsljgYPLj5s";
-char ssid[] = "OnePlus3";       // your network name also called SSID
-char password[] = "Hello1234";  // your network password
+char ubidotsToken[] = "***********";
+char ssid[] = "***********";       // your network name also called SSID
+char password[] = "***********";  // your network password
 
 Ubidots ubidots(ubidotsToken, UBI_TCP);
 
