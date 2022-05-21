@@ -35,8 +35,8 @@ const float32_t firCoeffs32[NUM_TAPS_ARRAY_SIZE] = {
 
 /* ==== CONSTANTS ====== */ 
 
-char ssid[] = "VM0235866";
-char password[] = "EFd8hbudjmdj";
+char ssid[] = "***********";
+char password[] = "***********";
 char ubidots_server[] = "industrial.api.ubidots.com";
 
 const unsigned int analogInput = 6;  //P4.3 (A10) analogRead() default freq 32.768kHz
