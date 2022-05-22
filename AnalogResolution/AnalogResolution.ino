@@ -10,8 +10,8 @@ WiFiClient client;
 
 /* ==== CONSTANTS ====== */ 
 
-char ssid[] = "OnePlus3";
-char password[] = "Hello1234";
+char ssid[] = "**********";
+char password[] = "********";
 char ubidots_server[] = "industrial.api.ubidots.com";
 
 const int analogInput = 5;  //P4.1 (A12) analogRead()
